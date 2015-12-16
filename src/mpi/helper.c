@@ -32,8 +32,6 @@ static MPI_Request node_req;
 extern MPI_Comm CAF_COMM_WORLD;
 extern int caf_this_image;
 extern int caf_num_images;
-extern MPI_Win win_ids[100];
-extern MPI_Group group;
 
 void * comm_thread_routine(void *arg)
 {
@@ -54,7 +52,7 @@ void * comm_thread_routine(void *arg)
 
   prog_init = 1;
 
-  while(multiple_nodes || prog_init == 1)
+  while(multiple_nodes)
     {
       if ((received = recvfrom(sock, &buffer, BUFLEN, 0, (struct sockaddr *)&si_me, &slen))==-1)
 	error("recvfrom()");
@@ -102,8 +100,6 @@ static int host_to_ip(char *hostname , char *ip)
 void check_helper_init()
 {
   while(prog_init == 0 && multiple_nodes) {;}
-  /* Ack for helper routine */
-  prog_init = 0;
 }
 
 void neigh_list_1st()
@@ -170,4 +166,12 @@ void send_sig(int dest, int img)
 
   return;
 }
+
+void ack_sig(int img)
+{
+  /* We just need to send a generic interger */
+  if(multiple_nodes)
+    MPI_Send(&caf_this_image,1,MPI_INT,img,10,CAF_COMM_WORLD);
+}
+
 #endif
