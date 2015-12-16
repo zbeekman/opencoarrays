@@ -337,10 +337,7 @@ PREFIX (init) (int *argc, char ***argv)
 
       int is_init = 0, prior_thread_level;
 #ifdef ASYNC_PROGRESS
-      prior_thread_level = MPI_THREAD_MULTIPLE;
-#ifdef NO_MULTIPLE
-      prior_thread_level = MPI_THREAD_FUNNELED;
-#endif
+      prior_thread_level = MPI_THREAD_MULTIPLE;//FUNNELED;
 #else
       prior_thread_level = MPI_THREAD_SINGLE;
 #endif
@@ -1097,8 +1094,8 @@ PREFIX (send) (caf_token_t token, size_t offset, int image_index,
 #else
           MPI_Win_flush (image_index-1, *p);
 #if defined(ASYNC_PROGRESS)
-          ack_sig(image_index-1);
-          /* MPI_Send(&caf_this_image,1,MPI_INT,image_index-1,10,CAF_COMM_WORLD); */
+	  /* We just need to send a generic interger */
+	  MPI_Send(&caf_this_image,1,MPI_INT,image_index-1,10,CAF_COMM_WORLD);
 #endif
 #endif // CAF_MPI_LOCK_UNLOCK
 #if defined(ASYNC_PROGRESS) && defined(NO_MULTIPLE)
@@ -1212,8 +1209,8 @@ PREFIX (send) (caf_token_t token, size_t offset, int image_index,
 # else // CAF_MPI_LOCK_UNLOCK
       MPI_Win_flush (image_index-1, *p);
 #if defined(ASYNC_PROGRESS)
-      ack_sig(image_index-1);
-      /* MPI_Send(&caf_this_image,1,MPI_INT,image_index-1,10,CAF_COMM_WORLD); */
+      /* We just need to send a generic interger */
+      MPI_Send(&caf_this_image,1,MPI_INT,image_index-1,10,CAF_COMM_WORLD);
 #endif
 # endif // CAF_MPI_LOCK_UNLOCK
 #if defined(ASYNC_PROGRESS) && defined(NO_MULTIPLE)
@@ -1491,8 +1488,7 @@ PREFIX (get) (caf_token_t token, size_t offset,
 # else // CAF_MPI_LOCK_UNLOCK
           MPI_Win_flush (image_index-1, *p);
 #if defined(ASYNC_PROGRESS)
-          ack_sig(image_index-1);
-          /* MPI_Send(&caf_this_image,1,MPI_INT,image_index-1,10,CAF_COMM_WORLD); */
+          MPI_Send(&caf_this_image,1,MPI_INT,image_index-1,10,CAF_COMM_WORLD);
 #endif
 # endif // CAF_MPI_LOCK_UNLOCK
 #if defined(ASYNC_PROGRESS) && defined(NO_MULTIPLE)
@@ -1603,8 +1599,7 @@ PREFIX (get) (caf_token_t token, size_t offset,
 # else // CAF_MPI_LOCK_UNLOCK
   MPI_Win_flush (image_index-1, *p);
 #if defined(ASYNC_PROGRESS)
-  ack_sig(image_index-1);
-  /* MPI_Send(&caf_this_image,1,MPI_INT,image_index-1,10,CAF_COMM_WORLD); */
+  MPI_Send(&caf_this_image,1,MPI_INT,image_index-1,10,CAF_COMM_WORLD);
 #endif
 # endif // CAF_MPI_LOCK_UNLOCK
 #if defined(ASYNC_PROGRESS) && defined(NO_MULTIPLE)

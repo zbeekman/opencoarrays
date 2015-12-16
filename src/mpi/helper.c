@@ -32,6 +32,8 @@ static MPI_Request node_req;
 extern MPI_Comm CAF_COMM_WORLD;
 extern int caf_this_image;
 extern int caf_num_images;
+extern MPI_Win win_ids[100];
+extern MPI_Group group;
 
 void * comm_thread_routine(void *arg)
 {
@@ -40,7 +42,6 @@ void * comm_thread_routine(void *arg)
   char buffer[BUFLEN] = "";
   int sock,received=0, tmp;
   MPI_Status s;
-
   if ((sock=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
     error("socket");
   memset((char *) &si_me, 0, sizeof(si_me));
@@ -57,7 +58,7 @@ void * comm_thread_routine(void *arg)
     {
       if ((received = recvfrom(sock, &buffer, BUFLEN, 0, (struct sockaddr *)&si_me, &slen))==-1)
 	error("recvfrom()");
-#if defined(NO_MULTIPLE)
+#if defined(ASYNC_PROGRESS) && defined(NO_MULTIPLE)
 	  pthread_mutex_lock (&comm_mutex);
 #endif
       for(i=0;i<(int)(received/sizeof(int));i++)
@@ -65,7 +66,7 @@ void * comm_thread_routine(void *arg)
 	  sscanf(buffer+i*sizeof(int),"%d",&tmp);
 	  MPI_Recv(&flag,1,MPI_INT,tmp,10,CAF_COMM_WORLD,&s);
 	}
-#if defined(NO_MULTIPLE)
+#if defined(ASYNC_PROGRESS) && defined(NO_MULTIPLE)
 	  pthread_mutex_unlock (&comm_mutex);
 #endif
     }
